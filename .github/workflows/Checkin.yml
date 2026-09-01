@@ -1,5 +1,6 @@
 name: IKUUU-Auto-Checkin
 
+# 账号和域名通过仓库 Secrets 注入，避免写入代码仓库。
 on:
   workflow_dispatch:
   schedule:
