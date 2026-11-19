@@ -198,6 +198,32 @@ async function processSingleAccount(account, hosts) {
   return checkInResult;
 }
 
+// Cookie 剩余有效期不足两天时给出提醒
+function buildExpiryNotice(accounts) {
+  const now = Date.now();
+  const twoDays = 2 * 24 * 60 * 60 * 1000;
+
+  for (const account of accounts) {
+    const matched = /expire_in=(\d+)/.exec(account.cookie || "");
+
+    if (!matched) {
+      continue;
+    }
+
+    const expiredAt = Number(matched[1]) * 1000;
+
+    if (expiredAt - now > twoDays) {
+      continue;
+    }
+
+    const text = new Date(expiredAt).toLocaleString("zh-CN", { timeZone: "Asia/Shanghai" });
+
+    return `⚠️ ${account.name} 的 Cookie 将于 ${text} 过期，请提前重新获取并更新 ACCOUNTS`;
+  }
+
+  return "";
+}
+
 function setGitHubOutput(name, value) {
   appendFileSync(process.env.GITHUB_OUTPUT, `${name}<<EOF\n${value}\nEOF\n`);
 }
@@ -223,6 +249,12 @@ async function main() {
 
   const hosts = resolveHosts();
   console.log(`候选域名：${hosts.join("、")}`);
+
+  const expiryNotice = buildExpiryNotice(accounts);
+
+  if (expiryNotice) {
+    console.log(expiryNotice);
+  }
 
   const allPromises = accounts.map((account) => processSingleAccount(account, hosts));
   const results = await Promise.allSettled(allPromises);
@@ -251,7 +283,7 @@ async function main() {
     return line;
   });
 
-  const resultMsg = resultLines.join("\n");
+  const resultMsg = [expiryNotice, ...resultLines].filter(Boolean).join("\n");
 
   setGitHubOutput("result", resultMsg);
 
