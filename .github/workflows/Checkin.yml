@@ -21,10 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Use Node.js latest
+      - name: Use Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: latest
+          node-version: "22"
 
       - name: Checkin
         id: checkin
