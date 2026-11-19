@@ -21,7 +21,7 @@
   ]
   ```
 
-- **HOST**: iKuuu 的域名，不设置时按内置候选域名 `ikuuu.top`、`ikuuu.pw` 依次尝试；多个域名可用英文逗号分隔，例如 `ikuuu.top,ikuuu.pw`。iKuuu 经常更换域名，需要随时注意修改。
+- **HOST**: iKuuu 的域名，可选。不设置时先尝试内置候选域名 `ikuuu.top`、`ikuuu.pw`，全部失效会自动读取公告页解析最新域名；多个域名可用英文逗号分隔，例如 `ikuuu.top,ikuuu.pw`。设置后只使用你填写的域名。
 - **TELEGRAM_TOKEN**: （可选）Telegram 通知的 Bot Token。
 - **TELEGRAM_TO**: （可选）Telegram 通知的 Chat ID。
 
@@ -32,6 +32,18 @@
 1. Fork 此仓库。
 2. 在 fork 后的仓库中启用 Actions。
 3. 配置仓库变量。
+
+### 域名自动发现
+
+iKuuu 会不定期更换面板域名，脚本按以下顺序选择签到地址：
+
+1. `HOST` 变量（如果配置了）。
+2. 内置候选域名 `ikuuu.top`、`ikuuu.pw`。
+3. 上述都不可用时，依次读取公告页 `ikuuu.win`、`ikuuu.ch`、`ikuuu.fyi`、`ikuuu.de`、`ikuuu.nl`，解析其中的最新面板域名后重试。
+
+判定规则：返回 405、404 或非 JSON 视为该域名已失效，自动换下一个；返回 302 跳转登录页视为 Cookie 失效，立即终止并提示更新 `ACCOUNTS`。
+
+仓库另有 `Keepalive.yml`，每月提交一次空提交，防止 GitHub 在 60 天无活动后停用定时任务。
 
 详细文档: https://ewigl.github.io/projects/github-actions-tasks/
 
